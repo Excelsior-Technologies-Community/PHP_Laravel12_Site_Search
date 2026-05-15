@@ -3,112 +3,197 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Search Results</title>
+
     <style>
-        body {
-            background: #0f172a;
-            color: white;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            padding: 40px;
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
 
-        h1 {
-            color: #38bdf8;
-            margin-bottom: 30px;
-            text-align: center;
-            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+        body{
+            background:#0f172a;
+            color:white;
+            font-family:Arial,sans-serif;
+            padding:40px;
         }
 
-        .card {
-            background: #1e293b;
-            padding: 25px 30px;
-            margin: 20px auto;
-            border-radius: 16px;
-            max-width: 700px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-            transition: transform 0.3s, box-shadow 0.3s;
+        h1{
+            color:#38bdf8;
+            text-align:center;
+            margin-bottom:20px;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+        .count{
+            text-align:center;
+            margin:20px 0;
+            color:#94a3b8;
         }
 
-        a {
-            color: #38bdf8;
-            text-decoration: none;
-            font-size: 22px;
-            font-weight: bold;
+        .trend-box{
+            background:#1e293b;
+            padding:20px;
+            border-radius:15px;
+            margin-bottom:30px;
+            text-align:center;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .trend-box h3{
+            margin-bottom:15px;
         }
 
-        .snippet {
-            color: #cbd5e1;
-            margin-top: 12px;
-            font-size: 16px;
-            line-height: 1.6;
+        .tag{
+            display:inline-block;
+            padding:10px 15px;
+            margin:5px;
+            background:#38bdf8;
+            color:black;
+            border-radius:30px;
+            font-weight:bold;
         }
 
-        .no-results {
-            color: #f87171;
-            font-weight: bold;
-            text-align: center;
+        .card{
+            background:#1e293b;
+            padding:20px;
+            margin-bottom:20px;
+            border-radius:15px;
+            transition:.3s;
         }
 
-        .back {
-            color: #facc15;
-            display: inline-block;
-            margin-top: 35px;
-            font-weight: bold;
-            font-size: 16px;
-            text-decoration: none;
+        .card:hover{
+            transform:translateY(-3px);
         }
 
-        .back:hover {
-            text-decoration: underline;
+        .card a{
+            color:#38bdf8;
+            font-size:22px;
+            text-decoration:none;
+            font-weight:bold;
         }
 
-        @media (max-width: 768px) {
-            .card {
-                padding: 20px;
-                border-radius: 12px;
-                margin: 15px;
+        .card p{
+            margin-top:12px;
+            line-height:1.7;
+            color:#cbd5e1;
+        }
+
+        mark{
+            background:yellow;
+            padding:2px;
+        }
+
+        .no-result{
+            text-align:center;
+            color:#ef4444;
+            margin-top:40px;
+        }
+
+        .back{
+            color:#facc15;
+            display:block;
+            text-align:center;
+            margin-top:30px;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
+        .back:hover{
+            text-decoration:underline;
+        }
+
+        @media(max-width:768px){
+
+            body{
+                padding:20px;
             }
 
-            a {
-                font-size: 18px;
+            .card{
+                padding:15px;
             }
 
-            .snippet {
-                font-size: 14px;
+            .card a{
+                font-size:18px;
             }
+
         }
     </style>
+
 </head>
 
 <body>
-    <h1>Search Results for "{{ $query }}"</h1>
+
+    <h1>
+        Search : "{{ $query }}"
+    </h1>
+
+
+    <div class="count">
+        {{ $results->count() }} results found
+    </div>
+
+
+    <div class="trend-box">
+
+        <h3>
+            🔥 Trending Searches
+        </h3>
+
+        @foreach($trending as $trend)
+
+            <span class="tag">
+                {{ $trend->keyword }}
+                ({{ $trend->count }})
+            </span>
+
+        @endforeach
+
+    </div>
+
 
     @if($results->isEmpty())
-        <p class="no-results">No results found.</p>
-    @else
-        @foreach($results as $post)
-            <div class="card">
-                <a href="{{ route('posts.show', ['id' => $post->id, 'query' => $query]) }}">
-                    {{ $post->title }}
-                </a>
-                <p class="snippet">{{ \Illuminate\Support\Str::limit($post->body, 200) }}</p>
-            </div>
-        @endforeach
+
+        <h2 class="no-result">
+            No Results Found
+        </h2>
+
     @endif
 
-    <div style="text-align:center;">
-        <a href="{{ url('/') }}" class="back">Back to Search</a>
-    </div>
+
+    @foreach($results as $post)
+
+        <div class="card">
+
+            <a href="{{ route('posts.show', ['id' => $post->id,'query'=>$query]) }}">
+                {{ $post->title }}
+            </a>
+
+            <p>
+                {!! str_ireplace(
+                    $query,
+                    "<mark>$query</mark>",
+                    Illuminate\Support\Str::limit(
+                        $post->body,
+                        200
+                    )
+                ) !!}
+            </p>
+
+        </div>
+
+    @endforeach
+
+
+    <a href="/" class="back">
+        Back To Search
+    </a>
+
 </body>
 
 </html>
