@@ -9,20 +9,15 @@ class SuggestionController extends Controller
 {
     public function index(Request $request)
     {
-        $search=$request->search;
+        $search = $request->search;
 
-        if(!$search)
-        {
+        if (!$search) {
             return response()->json([]);
         }
 
-        $posts=Post::where(
-                    'title',
-                    'like',
-                    "%{$search}%"
-                )
-                ->limit(5)
-                ->pluck('title');
+        $posts = Post::where('title', 'like', "%{$search}%")
+            ->limit(5)
+            ->pluck('title');
 
         return response()->json($posts);
     }
