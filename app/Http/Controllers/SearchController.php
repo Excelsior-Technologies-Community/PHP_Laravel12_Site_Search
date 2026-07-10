@@ -10,61 +10,34 @@ class SearchController extends Controller
 {
     public function index(Request $request)
     {
-        // Get search query
         $query = $request->input('query', '');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Save Search Keyword Count
-        |--------------------------------------------------------------------------
-        */
-        if (!empty($query)) {
-
+        if (!empty($query) && session('last_search') !== $query) {
             $keyword = SearchKeyword::firstOrCreate([
                 'keyword' => $query
             ]);
 
             $keyword->increment('count');
+
+            session(['last_search' => $query]);
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Search Posts
-        |--------------------------------------------------------------------------
-        */
         $results = collect();
 
         if (!empty($query)) {
-
             $results = Post::where('title', 'like', "%{$query}%")
-                            ->orWhere('body', 'like', "%{$query}%")
-                            ->get();
+                ->orWhere('body', 'like', "%{$query}%")
+                ->paginate(6)
+                ->appends(['query' => $query]);
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Get Top Trending Searches
-        |--------------------------------------------------------------------------
-        */
         $trending = SearchKeyword::orderBy('count', 'DESC')
-                        ->take(5)
-                        ->get();
+            ->take(5)
+            ->get();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Return Search Result View
-        |--------------------------------------------------------------------------
-        */
         return view(
             'search_results',
-            compact(
-                'results',
-                'query',
-                'trending'
-            )
+            compact('results', 'query', 'trending')
         );
     }
 }
